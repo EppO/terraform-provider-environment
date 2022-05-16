@@ -3,7 +3,7 @@ module github.com/krogon/terraform-provider-environment
 go 1.17
 
 require (
-	github.com/aws/aws-sdk-go v1.43.42
+	github.com/aws/aws-sdk-go v1.44.15
 	github.com/hashicorp/go-uuid v1.0.3
 	github.com/hashicorp/terraform-plugin-docs v0.7.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.14.0
