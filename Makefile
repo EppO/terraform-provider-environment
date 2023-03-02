@@ -3,7 +3,7 @@ HOSTNAME=hashicorp.com
 NAMESPACE=EppO
 NAME=environment
 BINARY=terraform-provider-${NAME}
-VERSION=1.3.3
+VERSION=1.3.4
 OS_ARCH=darwin_amd64
 
 default: install
