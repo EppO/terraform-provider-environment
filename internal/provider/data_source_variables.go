@@ -18,16 +18,16 @@ func dataSourceVariables() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceVariablesRead,
 		Schema: map[string]*schema.Schema{
-			"sensitive": &schema.Schema{
+			"sensitive": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  aws.Bool(false),
 			},
-			"filter": &schema.Schema{
+			"filter": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"items": &schema.Schema{
+			"items": {
 				Type:     schema.TypeMap,
 				Computed: true,
 				Elem: &schema.Schema{
