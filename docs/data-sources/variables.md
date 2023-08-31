@@ -46,9 +46,9 @@ resource "null_resource" "encoded" {
 ### Optional
 
 - `filter` (String)
-- `id` (String) The ID of this resource.
 - `sensitive` (Boolean)
 
 ### Read-Only
 
+- `id` (String) The ID of this resource.
 - `items` (Map of String)
