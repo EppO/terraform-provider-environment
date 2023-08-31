@@ -3,7 +3,7 @@ HOSTNAME=hashicorp.com
 NAMESPACE=EppO
 NAME=environment
 BINARY=terraform-provider-${NAME}
-VERSION=1.3.4
+VERSION=1.3.5
 OS_ARCH=darwin_amd64
 
 default: install
@@ -33,5 +33,7 @@ test:
 	go test -i $(TEST) || exit 1
 	echo $(TEST) | xargs -t -n4 go test $(TESTARGS) -timeout=30s -parallel=4
 
+# Run acceptance tests
+.PHONY: testacc
 testacc:
-	TF_ACC=1 go test $(TEST) -v $(TESTARGS) -timeout 120m
+	TF_ACC=1 go test ./... -v $(TESTARGS) -timeout 120m

@@ -18,16 +18,16 @@ func dataSourceVariables() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceVariablesRead,
 		Schema: map[string]*schema.Schema{
-			"sensitive": &schema.Schema{
+			"sensitive": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  aws.Bool(false),
 			},
-			"filter": &schema.Schema{
+			"filter": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"items": &schema.Schema{
+			"items": {
 				Type:     schema.TypeMap,
 				Computed: true,
 				Elem: &schema.Schema{
@@ -60,20 +60,18 @@ func flattenVariables(variables []string, sensitive bool, filter string) map[str
 	re := regexp.MustCompile(filter)
 
 	out := make(map[string]interface{})
-	if variables != nil {
-		for _, variable := range variables {
-			fields := strings.SplitN(variable, "=", 2)
-			name, value := fields[0], fields[1]
+	for _, variable := range variables {
+		fields := strings.SplitN(variable, "=", 2)
+		name, value := fields[0], fields[1]
 
-			if filtering && !re.MatchString(name) {
-				continue
-			}
-			if sensitive {
-				value = base64.StdEncoding.EncodeToString([]byte(value))
-			}
-
-			out[name] = value
+		if filtering && !re.MatchString(name) {
+			continue
 		}
+		if sensitive {
+			value = base64.StdEncoding.EncodeToString([]byte(value))
+		}
+
+		out[name] = value
 	}
 
 	return out
