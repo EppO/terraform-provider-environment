@@ -60,20 +60,18 @@ func flattenVariables(variables []string, sensitive bool, filter string) map[str
 	re := regexp.MustCompile(filter)
 
 	out := make(map[string]interface{})
-	if variables != nil {
-		for _, variable := range variables {
-			fields := strings.SplitN(variable, "=", 2)
-			name, value := fields[0], fields[1]
+	for _, variable := range variables {
+		fields := strings.SplitN(variable, "=", 2)
+		name, value := fields[0], fields[1]
 
-			if filtering && !re.MatchString(name) {
-				continue
-			}
-			if sensitive {
-				value = base64.StdEncoding.EncodeToString([]byte(value))
-			}
-
-			out[name] = value
+		if filtering && !re.MatchString(name) {
+			continue
 		}
+		if sensitive {
+			value = base64.StdEncoding.EncodeToString([]byte(value))
+		}
+
+		out[name] = value
 	}
 
 	return out
