@@ -1,6 +1,7 @@
 module github.com/EppO/terraform-provider-environment
 
-go 1.22.2
+go 1.22.7
+
 toolchain go1.22.11
 
 require (
