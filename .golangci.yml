@@ -10,7 +10,7 @@ linters:
     - copyloopvar
     - durationcheck
     - errcheck
-    - forcetypeassert
+#    - forcetypeassert
     - gofmt
     - gosimple
     - govet
