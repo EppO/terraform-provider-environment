@@ -7,9 +7,24 @@ description: |-
 
 # Environment Provider - Datasources
 
+~> **Deprecated:** This data source is deprecated and will be removed in **v3.0**.
+Use the [`get_env`](../functions/get_env.md) / [`get_env_map`](../functions/get_env_map.md)
+provider-defined functions instead. See the [Migration](#migration) section below.
+
 After declaring the Environment provider, you can define as many Terraform Datasources as Environment variables you need to use.
 You can also define a Datasource that will return a list of Environment variables.
 Mark the Datasource as sensitive if you don't want the value of the Environment variable to be displayed during plan/apply.
+
+## Migration
+
+The `get_env` and `get_env_map` provider-defined functions (Terraform 1.8+) replace this
+data source with an inline syntax that needs no `data` block or `provider` declaration:
+
+| Data source usage | Function equivalent |
+| --- | --- |
+| `data.environment_variables.x.items["FOO"]` | `provider::environment::get_env("FOO")` |
+| whole map / `filter = "^LC_"` | `provider::environment::get_env_map("^LC_")` |
+| `sensitive = true` | wrap the call: `sensitive(provider::environment::get_env_map("TOKEN"))` |
 
 ## Example Usage
 

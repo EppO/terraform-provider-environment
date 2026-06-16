@@ -11,6 +11,11 @@ import (
 
 func dataSourceVariables() *schema.Resource {
 	return &schema.Resource{
+		DeprecationMessage: "The environment_variables data source is deprecated and " +
+			"will be removed in v3.0. Use the get_env or get_env_map provider-defined " +
+			"functions instead. See " +
+			"https://registry.terraform.io/providers/EppO/environment/latest/docs/functions/get_env_map " +
+			"for the migration guide.",
 		ReadContext: dataSourceVariablesRead,
 		Schema: map[string]*schema.Schema{
 			"sensitive": {
