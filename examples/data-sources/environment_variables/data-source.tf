@@ -1,3 +1,8 @@
+# NOTE: The environment_variables data source is deprecated and will be removed in v3.0.
+# Prefer the get_env / get_env_map provider-defined functions, e.g.:
+#   provider::environment::get_env("HOME")
+#   provider::environment::get_env_map("^LC_")
+
 provider "environment" {}
 
 data "environment_variables" "all" {}
