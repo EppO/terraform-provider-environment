@@ -15,6 +15,10 @@ The recommended way to read environment variables is the provider-defined functi
 and can read a single variable or a filtered map of variables. Wrap a call with the
 built-in `sensitive()` function when the result may contain secrets.
 
+~> **Note:** `sensitive()` only redacts a value from `plan` and `apply` output — the
+value is still written to Terraform state in plain text. Do not use these functions to
+read secrets that must not be persisted to state.
+
 ~> **Deprecated:** The `environment_variables` data source is deprecated and will be
 removed in **v3.0**. Use the provider-defined functions instead. See the
 [data source documentation](./data-sources/variables.md) for a migration guide.
