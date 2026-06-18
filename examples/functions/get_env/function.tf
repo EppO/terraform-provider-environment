@@ -1,3 +1,14 @@
+# Provider-defined functions require Terraform 1.8 or later.
+terraform {
+  required_version = ">= 1.8.0"
+
+  required_providers {
+    environment = {
+      source = "EppO/environment"
+    }
+  }
+}
+
 # Read a single environment variable inline, without a data block.
 output "home" {
   value = provider::environment::get_env("HOME")

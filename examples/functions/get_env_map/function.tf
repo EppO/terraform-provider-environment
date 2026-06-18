@@ -1,3 +1,14 @@
+# Provider-defined functions require Terraform 1.8 or later.
+terraform {
+  required_version = ">= 1.8.0"
+
+  required_providers {
+    environment = {
+      source = "EppO/environment"
+    }
+  }
+}
+
 # Return every environment variable as a map.
 output "all" {
   value = provider::environment::get_env_map("")
