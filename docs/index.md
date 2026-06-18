@@ -30,6 +30,17 @@ removed in **v3.0**. Use the provider-defined functions instead. See the
 Read a single environment variable, optionally with a default:
 
 ```terraform
+# Provider-defined functions require Terraform 1.8 or later.
+terraform {
+  required_version = ">= 1.8.0"
+
+  required_providers {
+    environment = {
+      source = "EppO/environment"
+    }
+  }
+}
+
 # Read a single environment variable inline, without a data block.
 output "home" {
   value = provider::environment::get_env("HOME")
@@ -52,6 +63,17 @@ output "token" {
 Read a map of environment variables, optionally filtered by a regular expression:
 
 ```terraform
+# Provider-defined functions require Terraform 1.8 or later.
+terraform {
+  required_version = ">= 1.8.0"
+
+  required_providers {
+    environment = {
+      source = "EppO/environment"
+    }
+  }
+}
+
 # Return every environment variable as a map.
 output "all" {
   value = provider::environment::get_env_map("")
