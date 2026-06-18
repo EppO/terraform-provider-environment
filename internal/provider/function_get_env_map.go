@@ -27,7 +27,7 @@ func (f *getEnvMapFunction) Metadata(ctx context.Context, req function.MetadataR
 func (f *getEnvMapFunction) Definition(ctx context.Context, req function.DefinitionRequest, resp *function.DefinitionResponse) {
 	resp.Definition = function.Definition{
 		Summary:             "Return environment variables as a map, optionally filtered by a regular expression.",
-		MarkdownDescription: "Returns a map of environment variables. When `filter` is non-empty it is treated as a regular expression and only variables whose name matches are returned. Pass an empty string to return every variable. Wrap the result with the built-in `sensitive()` function if it may contain secrets.",
+		MarkdownDescription: "Returns a map of environment variables. When `filter` is non-empty it is treated as a regular expression and only variables whose name matches are returned. Pass an empty string to return every variable.\n\nWrap the result with the built-in `sensitive()` function if it may contain secrets.\n\n~> **Note:** `sensitive()` only redacts the value from `plan` and `apply` output — the value is still written to Terraform state in plain text. Do not use this function to read secrets that must not be persisted to state.",
 		Parameters: []function.Parameter{
 			function.StringParameter{
 				Name:                "filter",

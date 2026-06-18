@@ -10,6 +10,10 @@ description: |-
 
 Returns the value of the environment variable `name`. If the variable is not set, the first `default` argument is returned instead; if no default is provided, the function returns an error.
 
+Wrap the result with the built-in `sensitive()` function if it may contain secrets.
+
+~> **Note:** `sensitive()` only redacts the value from `plan` and `apply` output — the value is still written to Terraform state in plain text. Do not use this function to read secrets that must not be persisted to state.
+
 ## Example Usage
 
 ```terraform
@@ -21,6 +25,14 @@ output "home" {
 # Provide a default to use when the variable is not set.
 output "log_level" {
   value = provider::environment::get_env("LOG_LEVEL", "info")
+}
+
+# Wrap the result with sensitive() when it may contain a secret.
+# NOTE: sensitive() only hides the value from plan/apply output; it is
+# still written to Terraform state in plain text.
+output "token" {
+  value     = sensitive(provider::environment::get_env("TOKEN"))
+  sensitive = true
 }
 ```
 

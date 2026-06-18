@@ -15,6 +15,8 @@ After declaring the Environment provider, you can define as many Terraform Datas
 You can also define a Datasource that will return a list of Environment variables.
 Mark the Datasource as sensitive if you don't want the value of the Environment variable to be displayed during plan/apply.
 
+~> **Note:** The `sensitive` flag only redacts the value from `plan` and `apply` output — the value is still written to Terraform state in plain text. Do not use this data source to read secrets that must not be persisted to state.
+
 ## Migration
 
 The `get_env` and `get_env_map` provider-defined functions (Terraform 1.8+) replace this

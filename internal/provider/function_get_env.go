@@ -26,7 +26,7 @@ func (f *getEnvFunction) Metadata(ctx context.Context, req function.MetadataRequ
 func (f *getEnvFunction) Definition(ctx context.Context, req function.DefinitionRequest, resp *function.DefinitionResponse) {
 	resp.Definition = function.Definition{
 		Summary:             "Return the value of a single environment variable.",
-		MarkdownDescription: "Returns the value of the environment variable `name`. If the variable is not set, the first `default` argument is returned instead; if no default is provided, the function returns an error.",
+		MarkdownDescription: "Returns the value of the environment variable `name`. If the variable is not set, the first `default` argument is returned instead; if no default is provided, the function returns an error.\n\nWrap the result with the built-in `sensitive()` function if it may contain secrets.\n\n~> **Note:** `sensitive()` only redacts the value from `plan` and `apply` output — the value is still written to Terraform state in plain text. Do not use this function to read secrets that must not be persisted to state.",
 		Parameters: []function.Parameter{
 			function.StringParameter{
 				Name:                "name",

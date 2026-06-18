@@ -7,3 +7,11 @@ output "home" {
 output "log_level" {
   value = provider::environment::get_env("LOG_LEVEL", "info")
 }
+
+# Wrap the result with sensitive() when it may contain a secret.
+# NOTE: sensitive() only hides the value from plan/apply output; it is
+# still written to Terraform state in plain text.
+output "token" {
+  value     = sensitive(provider::environment::get_env("TOKEN"))
+  sensitive = true
+}

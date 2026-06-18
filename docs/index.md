@@ -15,6 +15,10 @@ The recommended way to read environment variables is the provider-defined functi
 and can read a single variable or a filtered map of variables. Wrap a call with the
 built-in `sensitive()` function when the result may contain secrets.
 
+~> **Note:** `sensitive()` only redacts a value from `plan` and `apply` output — the
+value is still written to Terraform state in plain text. Do not use these functions to
+read secrets that must not be persisted to state.
+
 ~> **Deprecated:** The `environment_variables` data source is deprecated and will be
 removed in **v3.0**. Use the provider-defined functions instead. See the
 [data source documentation](./data-sources/variables.md) for a migration guide.
@@ -34,6 +38,14 @@ output "home" {
 # Provide a default to use when the variable is not set.
 output "log_level" {
   value = provider::environment::get_env("LOG_LEVEL", "info")
+}
+
+# Wrap the result with sensitive() when it may contain a secret.
+# NOTE: sensitive() only hides the value from plan/apply output; it is
+# still written to Terraform state in plain text.
+output "token" {
+  value     = sensitive(provider::environment::get_env("TOKEN"))
+  sensitive = true
 }
 ```
 
