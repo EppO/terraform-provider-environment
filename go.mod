@@ -1,9 +1,9 @@
 module github.com/EppO/terraform-provider-environment
 
-go 1.25.8
+go 1.25.13
 
 require (
-	github.com/hashicorp/go-uuid v1.0.3
+	github.com/hashicorp/go-uuid v1.0.4
 	github.com/hashicorp/terraform-plugin-docs v0.25.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.40.1
 )
