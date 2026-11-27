@@ -2,18 +2,103 @@
 layout: ""
 page_title: "Provider: Environment"
 description: |-
-  The Environment provider maps Shell environment variables to Terraform Datasources.
+  The Environment provider exposes Shell environment variables to Terraform through provider-defined functions (get_env / get_env_map). A deprecated data source is also available.
 ---
 
 # Environment Provider
 
-The Environment provider exposes Shell environment variables as Terraform Datasources.
+The Environment provider exposes Shell environment variables to Terraform.
 
-It supports filtering a list of variables or just a single one. You can also mark the result of the Datasource as `sensitive`
+The recommended way to read environment variables is the provider-defined functions
+[`get_env`](./functions/get_env.md) and [`get_env_map`](./functions/get_env_map.md)
+(Terraform 1.8+). They work inline — no `data` block or `provider` declaration required —
+and can read a single variable or a filtered map of variables. Wrap a call with the
+built-in `sensitive()` function when the result may contain secrets.
+
+~> **Note:** `sensitive()` only redacts a value from `plan` and `apply` output — the
+value is still written to Terraform state in plain text. Do not use these functions to
+read secrets that must not be persisted to state.
+
+~> **Deprecated:** The `environment_variables` data source is deprecated and will be
+removed in **v3.0**. Use the provider-defined functions instead. See the
+[data source documentation](./data-sources/variables.md) for a migration guide.
 
 ## Example Usage
 
+### Provider-defined functions (recommended)
+
+Read a single environment variable, optionally with a default:
+
 ```terraform
+# Provider-defined functions require Terraform 1.8 or later.
+terraform {
+  required_version = ">= 1.8.0"
+
+  required_providers {
+    environment = {
+      source = "EppO/environment"
+    }
+  }
+}
+
+# Read a single environment variable inline, without a data block.
+output "home" {
+  value = provider::environment::get_env("HOME")
+}
+
+# Provide a default to use when the variable is not set.
+output "log_level" {
+  value = provider::environment::get_env("LOG_LEVEL", "info")
+}
+
+# Wrap the result with sensitive() when it may contain a secret.
+# NOTE: sensitive() only hides the value from plan/apply output; it is
+# still written to Terraform state in plain text.
+output "token" {
+  value     = sensitive(provider::environment::get_env("TOKEN"))
+  sensitive = true
+}
+```
+
+Read a map of environment variables, optionally filtered by a regular expression:
+
+```terraform
+# Provider-defined functions require Terraform 1.8 or later.
+terraform {
+  required_version = ">= 1.8.0"
+
+  required_providers {
+    environment = {
+      source = "EppO/environment"
+    }
+  }
+}
+
+# Return every environment variable as a map.
+output "all" {
+  value = provider::environment::get_env_map("")
+}
+
+# Filter variable names with a regular expression.
+output "lc" {
+  value = provider::environment::get_env_map("^LC_")
+}
+
+# Wrap the result with sensitive() when it may contain secrets.
+output "tokens" {
+  value     = provider::environment::get_env_map("TOKEN")
+  sensitive = true
+}
+```
+
+### Data source (deprecated)
+
+```terraform
+# NOTE: The environment_variables data source is deprecated and will be removed in v3.0.
+# Prefer the get_env / get_env_map provider-defined functions, e.g.:
+#   provider::environment::get_env("HOME")
+#   provider::environment::get_env_map("^LC_")
+
 provider "environment" {}
 
 data "environment_variables" "all" {}

@@ -2,16 +2,40 @@
 layout: ""
 page_title: "Provider: Environment"
 description: |-
-  The Environment provider maps Shell environment variables to Terraform Datasources.
+  The Environment provider exposes Shell environment variables to Terraform through provider-defined functions (get_env / get_env_map). A deprecated data source is also available.
 ---
 
 # Environment Provider
 
-The Environment provider exposes Shell environment variables as Terraform Datasources.
+The Environment provider exposes Shell environment variables to Terraform.
 
-It supports filtering a list of variables or just a single one. You can also mark the result of the Datasource as `sensitive`
+The recommended way to read environment variables is the provider-defined functions
+[`get_env`](./functions/get_env.md) and [`get_env_map`](./functions/get_env_map.md)
+(Terraform 1.8+). They work inline — no `data` block or `provider` declaration required —
+and can read a single variable or a filtered map of variables. Wrap a call with the
+built-in `sensitive()` function when the result may contain secrets.
+
+~> **Note:** `sensitive()` only redacts a value from `plan` and `apply` output — the
+value is still written to Terraform state in plain text. Do not use these functions to
+read secrets that must not be persisted to state.
+
+~> **Deprecated:** The `environment_variables` data source is deprecated and will be
+removed in **v3.0**. Use the provider-defined functions instead. See the
+[data source documentation](./data-sources/variables.md) for a migration guide.
 
 ## Example Usage
+
+### Provider-defined functions (recommended)
+
+Read a single environment variable, optionally with a default:
+
+{{tffile "examples/functions/get_env/function.tf"}}
+
+Read a map of environment variables, optionally filtered by a regular expression:
+
+{{tffile "examples/functions/get_env_map/function.tf"}}
+
+### Data source (deprecated)
 
 {{tffile "examples/data-sources/environment_variables/data-source.tf"}}
 

@@ -7,13 +7,73 @@ description: |-
 
 # Environment Provider - Datasources
 
+~> **Deprecated:** This data source is deprecated and will be removed in **v3.0**.
+Use the [`get_env`](../functions/get_env.md) / [`get_env_map`](../functions/get_env_map.md)
+provider-defined functions instead. See the [Migration](#migration) section below.
+
 After declaring the Environment provider, you can define as many Terraform Datasources as Environment variables you need to use.
 You can also define a Datasource that will return a list of Environment variables.
-Mark the Datasource as sensitive if you don't want the value of the Environment variable to be displayed during plan/apply.
+The optional `sensitive = true` setting Base64-encodes each value in `items`; it
+does not mark those values as sensitive in Terraform.
+
+~> **Note:** Base64 encoding is reversible and does not redact or encrypt values.
+Encoded values remain visible in `plan` and `apply` output and are stored in state.
+Do not use this data source to read secrets that must not be persisted to state.
+
+## Migration
+
+The `get_env` and `get_env_map` provider-defined functions (Terraform 1.8+) replace this
+data source with an inline syntax that needs no `data` block or `provider` declaration:
+
+When `sensitive = false` (the default), values are not encoded:
+
+| Data source usage | Function equivalent |
+| --- | --- |
+| `data.environment_variables.x.items["FOO"]` | `provider::environment::get_env("FOO")` |
+| whole map / `filter = "^LC_"` | `provider::environment::get_env_map("^LC_")` |
+
+### Migrating `sensitive = true`
+
+The data source returns Base64-encoded strings when `sensitive = true`, whereas
+`get_env` and `get_env_map` return the original, unencoded values. For example,
+`hello` is returned as `aGVsbG8=` by the data source, but as `hello` by the functions.
+Terraform's `sensitive()` function marks values for CLI redaction; it does not
+Base64-encode them or prevent them from being stored in state.
+
+**Use unencoded values:** Remove `base64decode(...)` calls that undo the data
+source's encoding, and update consumers that expect encoded strings. Use
+`sensitive()` when redaction is needed:
+
+```terraform
+locals {
+  tokens = sensitive(provider::environment::get_env_map("TOKEN"))
+}
+```
+
+**Preserve Base64-encoded values:** If consumers still expect Base64-encoded
+strings, encode each value explicitly:
+
+```terraform
+locals {
+  encoded_tokens = tomap({
+    for name, value in provider::environment::get_env_map("TOKEN") :
+    name => base64encode(value)
+  })
+}
+```
+
+Use `local.encoded_tokens` in place of the old `items` map for these consumers.
+Wrap it with `sensitive(local.encoded_tokens)` if redaction is also required;
+Base64 encoding alone does not mark values sensitive.
 
 ## Example Usage
 
 ```terraform
+# NOTE: The environment_variables data source is deprecated and will be removed in v3.0.
+# Prefer the get_env / get_env_map provider-defined functions, e.g.:
+#   provider::environment::get_env("HOME")
+#   provider::environment::get_env_map("^LC_")
+
 provider "environment" {}
 
 data "environment_variables" "all" {}
