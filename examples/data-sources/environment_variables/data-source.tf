@@ -1,3 +1,5 @@
+# Deprecated: Terraform stores data source results, including secrets, in plan
+# and state files. Use the environment_variables ephemeral resource instead.
 provider "environment" {}
 
 data "environment_variables" "all" {}

@@ -2,17 +2,40 @@
 layout: ""
 page_title: "Provider: Environment"
 description: |-
-  The Environment provider maps Shell environment variables to Terraform Datasources.
+  The Environment provider reads the environment variables of the Terraform process through ephemeral resources, which Terraform never stores in plan or state files.
 ---
 
 # Environment Provider
 
-The Environment provider exposes Shell environment variables as Terraform Datasources.
+The Environment provider reads the environment variables of the Terraform process,
+such as the variables of the CI/CD job running Terraform.
 
-It supports filtering a list of variables or just a single one. You can also mark the result of the Datasource as `sensitive`
+Use the [`environment_variables`](./ephemeral-resources/variables.md) and
+[`environment_sensitive_variables`](./ephemeral-resources/sensitive_variables.md)
+ephemeral resources to read them. Terraform reads ephemeral resources again in every
+plan and apply, and never stores their values in plan or state files.
+
+~> **Deprecated:** The `environment_variables` data source is deprecated and will be
+removed in **v3.0**, because Terraform stores data source results in plan and state
+files. See the [data source documentation](./data-sources/variables.md#migration)
+for a migration guide.
+
+## Requirements
+
+| Feature | Terraform version |
+| --- | --- |
+| Provider and `environment_variables` data source (deprecated) | 1.0 or later |
+| `environment_variables` and `environment_sensitive_variables` ephemeral resources | 1.10 or later |
+| Write-only arguments, to pass ephemeral values to managed resources | 1.11 or later |
 
 ## Example Usage
 
-{{tffile "examples/data-sources/environment_variables/data-source.tf"}}
+{{tffile "examples/ephemeral-resources/environment_variables/ephemeral-resource.tf"}}
 
-{{ .SchemaMarkdown | trimspace }}
+Read secrets with `environment_sensitive_variables`:
+
+{{tffile "examples/ephemeral-resources/environment_sensitive_variables/ephemeral-resource.tf"}}
+
+## Schema
+
+The provider has no configuration arguments.

@@ -42,6 +42,10 @@ jobs:
         with:
           go-version-file: 'go.mod'
           cache: true
+      # tfplugindocs needs Terraform 1.10 or later to document ephemeral resources.
+      - uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_wrapper: false
       - run: go generate ./...
       - name: git diff
         run: |
@@ -57,11 +61,20 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # list whatever Terraform versions here you would like to support
+        # The provider requires Terraform 1.0 or later (protocol version 6), and
+        # its ephemeral resources Terraform 1.10 or later: their acceptance tests
+        # are skipped with older versions.
         terraform:
-          - '1.8.*'
+          - '1.0.*'
           - '1.9.*'
           - '1.10.*'
+          - '1.11.*'
+          - '1.12.*'
+          - '1.13.*'
+          - '1.14.*'
+          - '1.15.*'
+          - '1.16.*'
+          - '1.17.*'
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-go@v7
@@ -75,5 +88,5 @@ jobs:
       - run: go mod download
       - env:
           TF_ACC: "1"
-        run: go test -v -cover ./internal/provider/
+        run: go test -v -cover ./...
         timeout-minutes: 10

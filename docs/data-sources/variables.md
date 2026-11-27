@@ -2,18 +2,29 @@
 layout: ""
 page_title: "Provider: Environment - Datasources"
 description: |-
-  The Environment provider maps Shell environment variables to Terraform Datasources.
+  The deprecated environment_variables data source reads the environment variables of the Terraform process. Use the environment_variables or environment_sensitive_variables ephemeral resource instead.
 ---
 
-# Environment Provider - Datasources
+# environment_variables (Data Source)
 
-After declaring the Environment provider, you can define as many Terraform Datasources as Environment variables you need to use.
-You can also define a Datasource that will return a list of Environment variables.
-Mark the Datasource as sensitive if you don't want the value of the Environment variable to be displayed during plan/apply.
+~> **Deprecated:** This data source is deprecated and will be removed in **v3.0**.
+Terraform stores data source results, including secrets, in plan and state files.
+Use the [`environment_variables`](../ephemeral-resources/variables.md) or
+[`environment_sensitive_variables`](../ephemeral-resources/sensitive_variables.md)
+ephemeral resource instead. See the [Migration](#migration) section below.
+
+Reads the environment variables of the Terraform process, optionally filtered by
+a regular expression.
+
+The optional `sensitive = true` argument Base64-encodes each value in `items`. It
+doesn't mark the values as sensitive: Terraform displays them in plan output and
+stores them in state.
 
 ## Example Usage
 
 ```terraform
+# Deprecated: Terraform stores data source results, including secrets, in plan
+# and state files. Use the environment_variables ephemeral resource instead.
 provider "environment" {}
 
 data "environment_variables" "all" {}
@@ -45,10 +56,51 @@ resource "null_resource" "encoded" {
 
 ### Optional
 
-- `filter` (String)
-- `sensitive` (Boolean)
+- `filter` (String) Regular expression, in [RE2 syntax](https://github.com/google/re2/wiki/Syntax), matched against the name of each environment variable. Only matching variables are returned. The match is not anchored: use `^NAME$` to match a single variable. When omitted, every environment variable is returned.
+- `sensitive` (Boolean) When `true`, Base64-encodes each value in `items`. Despite its name, it does not mark the values as sensitive and they are still stored in the plan and state. Defaults to `false`.
 
 ### Read-Only
 
-- `id` (String) The ID of this resource.
-- `items` (Map of String)
+- `id` (String) Random UUID, generated on every read.
+- `items` (Map of String) Matching environment variables, keyed by name.
+
+## Migration
+
+The ephemeral resources (Terraform 1.10 or later) take the same `filter` argument
+and return the same `items` map, without the `id` and `sensitive` attributes:
+
+| Data source | Ephemeral resource |
+| --- | --- |
+| `data "environment_variables" "x" { filter = "^FOO$" }` | `ephemeral "environment_variables" "x" { filter = "^FOO$" }` |
+| `data "environment_variables" "x" { sensitive = true }` | `ephemeral "environment_sensitive_variables" "x" {}` |
+| `data.environment_variables.x.items["FOO"]` | `ephemeral.environment_variables.x.items["FOO"]` |
+
+Terraform only accepts ephemeral values in some contexts, such as provider
+configuration blocks, write-only arguments of managed resources (Terraform 1.11
+or later), locals, and other ephemeral resources. Terraform reads them again
+when it applies a saved plan, and never stores them in plan or state files.
+
+### Values that Terraform must store
+
+Terraform rejects ephemeral values in arguments that it stores, such as most
+managed resource arguments and root module outputs. For these values, declare an
+input variable and set it with a `TF_VAR_<name>` environment variable. Terraform
+stores input variable values in plan files, and in state when resources use them.
+
+```terraform
+variable "log_level" {
+  type    = string
+  default = "info"
+}
+```
+
+```shell
+export TF_VAR_log_level="$LOG_LEVEL"
+```
+
+### Migrating `sensitive = true`
+
+The data source returns Base64-encoded values when `sensitive = true`, whereas
+the ephemeral resources return the original values. Remove the `base64decode()`
+calls that undo the data source encoding, or call `base64encode()` on the values
+that consumers expect to be encoded.

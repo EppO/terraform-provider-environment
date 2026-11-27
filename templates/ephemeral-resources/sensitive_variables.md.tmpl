@@ -1,0 +1,38 @@
+---
+page_title: "Provider: Environment - {{.Name}} {{.Type}}"
+subcategory: ""
+description: |-
+{{ .Description | plainmarkdown | trimspace | prefixlines "  " }}
+---
+
+# {{.Name}} ({{.Type}})
+
+{{ .Description | trimspace }}
+
+Use the variables in contexts that accept ephemeral values, such as provider
+configuration blocks, write-only arguments of managed resources (Terraform 1.11
+or later), locals, and other ephemeral resources.
+
+Terraform reads the variables again when it applies a saved plan, so their values
+can differ between plan and apply, for example when plan and apply run in
+different CI/CD jobs.
+
+~> **Note:** Terraform doesn't currently apply the sensitivity of ephemeral
+resource attributes to the values that you reference, so `issensitive()` returns
+`false` for them. The values are still protected because they're ephemeral:
+Terraform never stores them in plan or state files, and doesn't display them in
+diagnostics or provisioner output. Wrap a value with `sensitive()` if it must
+also be marked as sensitive.
+
+-> **Note:** The provider reads the environment of the Terraform process. With
+remote execution, such as HCP Terraform remote runs, this is the environment of
+the remote worker.
+
+Referencing a variable that isn't set, as in `items["NAME"]`, is an error. Use
+`lookup()` with a default value for optional variables.
+
+## Example Usage
+
+{{ tffile .ExampleFile }}
+
+{{ .SchemaMarkdown | trimspace }}
