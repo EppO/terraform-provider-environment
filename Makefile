@@ -30,10 +30,15 @@ install: build
 	mv ${BINARY} ~/.terraform.d/plugins/${HOSTNAME}/${NAMESPACE}/${NAME}/${VERSION}/${OS_ARCH}
 
 test:
-	go test -i $(TEST) || exit 1
-	echo $(TEST) | xargs -t -n4 go test $(TESTARGS) -timeout=30s -parallel=4
+	go test $(TEST) $(TESTARGS) -timeout=30s -parallel=4
 
 # Run acceptance tests
 .PHONY: testacc
 testacc:
 	TF_ACC=1 go test ./... -v $(TESTARGS) -timeout 120m
+
+# Run unit and acceptance tests, and report the coverage
+.PHONY: cover
+cover:
+	TF_ACC=1 go test ./... $(TESTARGS) -coverprofile=coverage.out -timeout 120m
+	go tool cover -func=coverage.out

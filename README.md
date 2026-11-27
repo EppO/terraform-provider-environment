@@ -1,14 +1,59 @@
 # Terraform Provider Environment [![release](https://github.com/EppO/terraform-provider-environment/actions/workflows/release.yml/badge.svg)](https://github.com/EppO/terraform-provider-environment/actions/workflows/release.yml)
 
-Terraform provider able to detect environment settings.
-Useful for debugging terraform running in CI.
+Terraform provider that reads the environment variables of the Terraform process,
+such as the variables of the CI/CD job running Terraform.
+
+It provides two ephemeral resources (Terraform 1.10 or later). Terraform reads them
+again in every plan and apply, and never stores their values in plan or state files:
+
+- `environment_variables` reads environment variables, optionally filtered by a
+  regular expression.
+- `environment_sensitive_variables` reads secrets: the provider schema marks its
+  values as sensitive.
+
+The `environment_variables` data source is deprecated and will be removed in v3.0,
+because Terraform stores its results in plan and state files. See the
+[migration guide](docs/data-sources/variables.md#migration).
+
+## Requirements
+
+| Feature | Terraform version |
+| --- | --- |
+| Provider and `environment_variables` data source (deprecated) | 1.0 or later |
+| `environment_variables` and `environment_sensitive_variables` ephemeral resources | 1.10 or later |
+| Write-only arguments, to pass ephemeral values to managed resources | 1.11 or later |
+
+## Example
+
+```hcl
+# Reads the deployment settings exported by the CI/CD job running Terraform.
+ephemeral "environment_variables" "deploy" {
+  filter = "^DEPLOY_"
+}
+
+provider "aws" {
+  # lookup returns a default value when the variable isn't set.
+  region = lookup(ephemeral.environment_variables.deploy.items, "DEPLOY_REGION", "us-east-1")
+
+  assume_role {
+    role_arn = ephemeral.environment_variables.deploy.items["DEPLOY_ROLE_ARN"]
+  }
+}
+```
+
+More examples are available in the [examples](examples) directory and in the
+[documentation](docs).
 
 ## Test
 
 ```shell
-make test
-make testacc
+make test     # unit tests
+make testacc  # unit and acceptance tests, requires Terraform
+make cover    # unit and acceptance tests, with a coverage report
 ```
+
+The acceptance tests of the ephemeral resources are skipped with Terraform versions
+older than 1.10.
 
 ## Build
 
@@ -22,75 +67,4 @@ make build
 
 ```shell
 make install
-```
-
-## Example
-
-```hcl
-provider "environment" {}
-
-data "environment_variables" "all" {}
-
-data "environment_variables" "regexp" {
-  filter = "^LC_"
-}
-
-data "environment_variables" "encoded" {
-  filter    = "TOKEN"
-  sensitive = true
-}
-
-resource "null_resource" "all" {
-  triggers = data.environment_variables.all.items
-}
-
-resource "null_resource" "regexp" {
-  triggers = data.environment_variables.regexp.items
-}
-
-resource "null_resource" "encoded" {
-  triggers = data.environment_variables.encoded.items
-}
-```
-
-The example code is available inside example directory.
-
-```shell
-terraform init && terraform plan
-```
-
-```shell
-Terraform will perform the following actions:
-
-  # null_resource.all will be created
-  + resource "null_resource" "all" {
-      + id       = (known after apply)
-      + triggers = {
-          + "PWD"                                 = "/terraform/terraform-provider-environment/examples"
-          + "TERM"                                = "xterm-256color"
-          + "SHELL"                               = "/bin/zsh"
-          + "SHLVL"                               = "1"
-          [...]
-    }
-
-  # null_resource.encoded will be created
-  + resource "null_resource" "encoded" {
-      + id       = (known after apply)
-      + triggers = {
-          + "TFE_TOKEN" = "ZXhhbXBsZS5hdGxhc3YxLnNlY3JldHRva2Vu"
-        }
-    }
-
-  # null_resource.regexp will be created
-  + resource "null_resource" "regexp" {
-      + id       = (known after apply)
-      + triggers = {
-          + "LC_CTYPE"            = "UTF-8"
-          + "LC_TERMINAL"         = "iTerm2"
-          + "LC_TERMINAL_VERSION" = "3.3.11"
-        }
-    }
-
-Plan: 3 to add, 0 to change, 0 to destroy.
-
 ```

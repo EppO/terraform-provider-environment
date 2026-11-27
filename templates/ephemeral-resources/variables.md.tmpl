@@ -1,0 +1,31 @@
+---
+page_title: "Provider: Environment - {{.Name}} {{.Type}}"
+subcategory: ""
+description: |-
+{{ .Description | plainmarkdown | trimspace | prefixlines "  " }}
+---
+
+# {{.Name}} ({{.Type}})
+
+{{ .Description | trimspace }}
+
+Use the variables in contexts that accept ephemeral values, such as provider
+configuration blocks, write-only arguments of managed resources (Terraform 1.11
+or later), locals, and other ephemeral resources.
+
+Terraform reads the variables again when it applies a saved plan, so their values
+can differ between plan and apply, for example when plan and apply run in
+different CI/CD jobs.
+
+-> **Note:** The provider reads the environment of the Terraform process. With
+remote execution, such as HCP Terraform remote runs, this is the environment of
+the remote worker.
+
+Referencing a variable that isn't set, as in `items["NAME"]`, is an error. Use
+`lookup()` with a default value for optional variables.
+
+## Example Usage
+
+{{ tffile .ExampleFile }}
+
+{{ .SchemaMarkdown | trimspace }}
